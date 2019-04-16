@@ -1,32 +1,28 @@
 import click
+import getpass
 from eth_wallet.cli.utils_cli import (
     get_api,
-)
-from eth_utils import (
-    decode_hex,
 )
 
 
 @click.command()
-@click.option('-e', '--extra-entropy', default='', prompt='extra entropy',
-              help='creates new account with optional entropy')
-def new_account(extra_entropy):
-    """Creates new account. And save it."""
-    if extra_entropy != '':
-        click.echo('Your extra entropy is %s!' % extra_entropy)
+@click.option('-e', '--extra-entropy', default='', prompt='Extra entropy',
+              help='Adds extra entropy to generated private key.')
+@click.option('-p', '--path', help='Path where to store keystore.')
+def new_account(extra_entropy, path):
+    """Creates new account and store encrypted keystore file."""
+    password = getpass.getpass('Password from keystore: ')  # Prompt the user for a password of keystore file
+
     api = get_api()
-    account = api.new_account(extra_entropy)
-    click.echo('Account address: %s' % str(account.get_account_address()))
-    address_bytes = decode_hex(account.get_account_address())
-    click.echo('Public key length: %d' % len(address_bytes))
-    click.echo('\n')
+    if path is None:
+        wallet, keystore_path = api.new_account(password, extra_entropy=extra_entropy)
+    else:
+        wallet, keystore_path = api.new_account(password, extra_entropy=extra_entropy, keystore_path=path)
 
-    click.echo('Account pub key: %s' % str(account.get_account_public_key()))
-    public_key_bytes = decode_hex(account.get_account_public_key())
-    click.echo('Public key length: %d' % len(public_key_bytes))
-    click.echo('\n')
+    click.echo('Account address: %s' % str(wallet.get_account_address()))
+    click.echo('Account pub key: %s' % str(wallet.get_account_public_key()))
+    click.echo('Keystore path: %s' % keystore_path)
 
-    click.echo('Account prv key: %s' % str(account.get_account_private_key().hex()))
-    click.echo('Private key length: %d' % len(account.get_account_private_key()))
-    click.echo('\n')
-    # TODO: save encrypted file
+
+
+
