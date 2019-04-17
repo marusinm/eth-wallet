@@ -1,5 +1,3 @@
-import pytest
-
 from eth_keys import (
     keys,
 )
@@ -9,24 +7,27 @@ from eth_utils import (
 from eth_wallet.utils import (
     public_key_to_keccak256
 )
-from eth_wallet.account import (
-    WalletAccount
+from eth_wallet.wallet import (
+    Wallet
+)
+from web3 import(
+    Web3,
 )
 
 
-def test_account():
-    account = WalletAccount()
-    account.create('eXtR4 EntroPy Str1Ng')
+def test_lengths():
+    wallet = Wallet()
+    wallet.create_account('eXtR4 EntroPy Str1Ng')
 
     # check length of private key
-    assert len(account.get_account_private_key()) == 32
+    assert len(wallet.get_account_private_key()) == 32
 
     # check length of public key
-    public_key_bytes = decode_hex(account.get_account_public_key())
+    public_key_bytes = decode_hex(wallet.get_account_public_key())
     assert len(public_key_bytes) == 64
 
     # check length of address
-    address_bytes = decode_hex(account.get_account_address())
+    address_bytes = decode_hex(wallet.get_account_address())
     assert len(address_bytes) == 20
 
 
@@ -45,3 +46,10 @@ def test_keys():
     # check eth address - keccak-256 hash of the hexadecimal form of a public key, then keep only the last 20 bytes
     assert public_key.to_checksum_address() == '0xfe7eaD4D9beD0F1AC2b9f7d8910d8717b505Db4c'
     assert public_key.to_address() == '0xfe7ead4d9bed0f1ac2b9f7d8910d8717b505db4c'
+
+
+def test_addresses():
+    wallet = Wallet()
+    wallet.create_account('eXtR4 EntroPy Str1Ng')
+    assert Web3.isAddress(wallet.get_account_address())
+    assert Web3.isChecksumAddress(wallet.get_account_address())

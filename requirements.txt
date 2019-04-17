@@ -1,4 +1,0 @@
-web3==4.9.1
-eth-account==0.3.0
-eth-keys==0.2.1
-Click==7.0
