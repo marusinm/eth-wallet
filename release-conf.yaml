@@ -1,3 +1,7 @@
+## list of changes
+changelog:
+  - Command tool for key manipulation
+  - Key storing in single keystore
 # whether to release on PyPi. True by default
 pypi: false
 # list of labels to be put on issues and PRs created by bot
