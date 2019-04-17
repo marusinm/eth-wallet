@@ -1,3 +1,4 @@
 # 0.0.1
 
-No changelog provided
+* Command tool for key manipulation
+* Key storing in single keystore
