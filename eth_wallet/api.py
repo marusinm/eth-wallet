@@ -1,40 +1,55 @@
 from eth_wallet.wallet import (
     Wallet
 )
+# from eth_wallet.configuration import (
+#     configuration
+# )
+from web3.exceptions import (
+    InvalidAddress,
+)
 
 
 class WalletAPI:
 
     @staticmethod
-    def new_account(keystore_password, extra_entropy='', keystore_path=None):
+    def new_wallet(configuration, keystore_password, extra_entropy=''):
         """
         Create new wallet account and save encrypted keystore
         :param keystore_password: user password from keystore
         :param extra_entropy: extra string entropy for CSPRNG of private key
-        :param keystore_path: where to save encrypted keystore
         :return: created wallet account object and saved keystore path
         """
-        wallet = Wallet()
-        account = wallet.create_account(extra_entropy)
+        wallet = Wallet(configuration).create(extra_entropy)
+        wallet.save_keystore(keystore_password)
 
-        if keystore_path is None:
-            keystore_path = wallet.save_account_keystore(keystore_password)
-        else:
-            keystore_path = wallet.save_account_keystore(keystore_password, keystore_path)
-
-        return account, keystore_path
+        return wallet
 
     @staticmethod
-    def get_account(keystore_password, keystore_path=None):
+    def get_wallet(configuration):
         """
-        Get wallet account from default keystore location
-        :param keystore_password: user password from keystore
-        :param keystore_path: where to finde encrypted keystore
+        Get account address and private key from default keystore location
         :return: account object
         """
-        if keystore_path is None:
-            wallet = Wallet().load_account_keystore(keystore_password)
-        else:
-            wallet = Wallet().load_account_keystore(keystore_password, keystore_path)
+        address = Wallet(configuration).get_address()
+        pub_key = Wallet(configuration).get_public_key()
+
+        return address, pub_key
+
+    @staticmethod
+    def get_balance(configuration, address):
+        try:
+            eth_balance = Wallet(configuration).get_balance(address)
+            return eth_balance
+        except InvalidAddress:
+            return 'Wallet does not exist!'
+
+    @staticmethod
+    def get_private_key(configuration, keystore_password):
+        """
+        Get account private key from default keystore location
+        :param keystore_password: user password from keystore
+        :return: account object
+        """
+        wallet = Wallet(configuration).load_keystore(keystore_password)
 
         return wallet
