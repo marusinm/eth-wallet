@@ -1,3 +1,4 @@
+import pytest
 from eth_keys import (
     keys,
 )
@@ -13,21 +14,29 @@ from eth_wallet.wallet import (
 from web3 import(
     Web3,
 )
+from tests.conftest import (
+    prepare_conf
+)
 
 
-def test_lengths():
-    wallet = Wallet()
-    wallet.create_account('eXtR4 EntroPy Str1Ng')
+@pytest.fixture
+def configuration(tmp_path):
+    return prepare_conf(tmp_path)
+
+
+def test_lengths(configuration):
+    wallet = Wallet(configuration)
+    wallet.create('eXtR4 EntroPy Str1Ng')
 
     # check length of private key
-    assert len(wallet.get_account_private_key()) == 32
+    assert len(wallet.get_private_key()) == 32
 
     # check length of public key
-    public_key_bytes = decode_hex(wallet.get_account_public_key())
+    public_key_bytes = decode_hex(wallet.get_public_key())
     assert len(public_key_bytes) == 64
 
     # check length of address
-    address_bytes = decode_hex(wallet.get_account_address())
+    address_bytes = decode_hex(wallet.get_address())
     assert len(address_bytes) == 20
 
 
@@ -48,8 +57,8 @@ def test_keys():
     assert public_key.to_address() == '0xfe7ead4d9bed0f1ac2b9f7d8910d8717b505db4c'
 
 
-def test_addresses():
-    wallet = Wallet()
-    wallet.create_account('eXtR4 EntroPy Str1Ng')
-    assert Web3.isAddress(wallet.get_account_address())
-    assert Web3.isChecksumAddress(wallet.get_account_address())
+def test_addresses(configuration):
+    wallet = Wallet(configuration)
+    wallet.create('eXtR4 EntroPy Str1Ng')
+    assert Web3.isAddress(wallet.get_address())
+    assert Web3.isChecksumAddress(wallet.get_address())

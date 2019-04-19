@@ -13,20 +13,29 @@ def public_key_bytes_to_address(public_key_bytes: bytes) -> bytes:
     return keccak(public_key_bytes)[-20:]
 
 
-def is_directory(dirname):
+def is_file(path):
     """
-    Checks if filename is directory.
-    :param dirname: path with directory
+    Checks if path is file.
+    :param path: path with filename
+    :return: True if file exists
+    """
+    return os.path.isfile(path)
+
+
+def is_directory(path):
+    """
+    Checks if path is directory.
+    :param path: path with directory
     :return: True if is directory, False if directory doesn't exist
     """
-    if os.path.exists(dirname):
+    if os.path.exists(path):
         return True
     return False
 
 
 def create_directory(dirname):
     """
-    Crete directory.
+    Crete directory if doesn't already exist.
     :param dirname: path with new directory
     :return: path with directory
     """
