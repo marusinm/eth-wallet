@@ -7,6 +7,7 @@ from eth_wallet.configuration import (
     Configuration,
 )
 
+
 @click.command()
 @click.option('-e', '--extra-entropy', default='', prompt='Extra entropy',
               help='Adds extra entropy to generated private key.')

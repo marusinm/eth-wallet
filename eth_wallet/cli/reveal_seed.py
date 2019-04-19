@@ -6,6 +6,9 @@ from eth_wallet.cli.utils_cli import (
 from eth_wallet.configuration import (
     Configuration,
 )
+from eth_wallet.exceptions import (
+    InvalidPasswordException,
+)
 
 
 @click.command()
@@ -20,5 +23,5 @@ def reveal_seed():
         wallet = api.get_private_key(configuration, password)
         click.echo('Account prv key: %s' % str(wallet.get_private_key().hex()))
 
-    except ValueError:
+    except InvalidPasswordException:
         click.echo('Incorrect password!')
