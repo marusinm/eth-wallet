@@ -1,5 +1,4 @@
 import json
-import os
 from eth_account import (
     Account,
 )
@@ -12,9 +11,9 @@ from eth_wallet.utils import (
 from eth_wallet.infura import (
     Infura,
 )
-# from eth_wallet.configuration import (
-#     configuration
-# )
+from eth_wallet.exceptions import (
+    InvalidPasswordException,
+)
 
 
 class Wallet:
@@ -41,17 +40,17 @@ class Wallet:
         pub_key = priv_key.public_key
         self.conf.update_public_key(pub_key.to_hex())
 
-        self.w3 = Infura()
+        self.w3 = Infura().get_web3()
         return self
 
-    def __get_account(self):
+    def get_account(self):
         """
         Returns account
         :return: account object
         """
         return self.account
 
-    def __set_account(self, private_key):
+    def set_account(self, private_key):
         """
         Creates new account from private key with appropriate address
         :param private_key: in format hex str/bytes/int/eth_keys.datatypes.PrivateKey
@@ -83,8 +82,12 @@ class Wallet:
         with open(keystore_path) as keystore:
             keyfile_json = json.load(keystore)
 
-        private_key = Account.decrypt(keyfile_json, password)
-        self.__set_account(private_key)
+        try:
+            private_key = Account.decrypt(keyfile_json, password)
+        except ValueError:
+            raise InvalidPasswordException()
+
+        self.set_account(private_key)
         return self
 
     def get_private_key(self):

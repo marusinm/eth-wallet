@@ -11,6 +11,9 @@ from eth_wallet.cli.reveal_seed import (
 from eth_wallet.cli.get_balance import (
     get_balance,
 )
+from eth_wallet.cli.send_transaction import (
+    send_transaction,
+)
 
 
 @click.group()
@@ -22,6 +25,7 @@ eth_wallet_cli.add_command(new_wallet)
 eth_wallet_cli.add_command(get_wallet)
 eth_wallet_cli.add_command(reveal_seed)
 eth_wallet_cli.add_command(get_balance)
+eth_wallet_cli.add_command(send_transaction)
 
 if __name__ == "__main__":
     eth_wallet_cli()
