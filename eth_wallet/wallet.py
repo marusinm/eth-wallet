@@ -14,6 +14,9 @@ from eth_wallet.infura import (
 from eth_wallet.exceptions import (
     InvalidPasswordException,
 )
+from mnemonic import (
+    Mnemonic
+)
 
 
 class Wallet:
@@ -25,14 +28,29 @@ class Wallet:
         self.conf = configuration
         self.account = None
         self.w3 = None
+        self.mnemonic_sentence = None
 
-    def create(self, extra_entropy=''):
+    def create(self, password='', restore_sentence=None):
         """
         Creates new wallet that means private key with an attached address using os.urandom CSPRNG
-        :param extra_entropy: Add extra randomness to whatever randomness your OS can provide
+        :param password: Is used as extra randomness to whatever randomness your OS can provide
+        :param restore_sentence: Used in case of restoring wallet from mnemonic sentence.
         :return: object with private key
         """
-        self.account = Account.create(extra_entropy)
+        extra_entropy = password
+
+        mnemonic = Mnemonic("english")
+        if restore_sentence is None:
+            self.mnemonic_sentence = mnemonic.generate()
+        else:
+            self.mnemonic_sentence = restore_sentence
+
+        seed = mnemonic.to_seed(self.mnemonic_sentence, extra_entropy)
+        master_private_key = seed[32:]
+
+        # self.account = Account.create(extra_entropy)
+        self.account = self.set_account(master_private_key)
+
         # update config address
         self.conf.update_eth_address(self.account.address)
         # update config public key
@@ -42,6 +60,16 @@ class Wallet:
 
         self.w3 = Infura().get_web3()
         return self
+
+    def restore(self, mnemonic_sentence, password):
+        """
+        Recreates wallet from mnemonic sentence
+        :param mnemonic_sentence: remembered user mnemonic sentence
+        :type mnemonic_sentence: str
+        :param password: password from keystore which is used as entropy too
+        :return: wallet
+        """
+        return self.create(password, mnemonic_sentence)
 
     def get_account(self):
         """
@@ -89,6 +117,13 @@ class Wallet:
 
         self.set_account(private_key)
         return self
+
+    def get_mnemonic(self):
+        """
+        Returns BIP39 mnemonic sentence
+        :return: mnemonic words
+        """
+        return self.mnemonic_sentence
 
     def get_private_key(self):
         """
