@@ -24,16 +24,29 @@ from decimal import (
 class WalletAPI:
 
     @staticmethod
-    def new_wallet(configuration, keystore_password, extra_entropy=''):
+    def new_wallet(configuration, password):
         """
         Create new wallet account and save encrypted keystore
         :param configuration: loaded configuration file instance
-        :param keystore_password: user password from keystore
-        :param extra_entropy: extra string entropy for CSPRNG of private key
-        :return: created wallet account object and saved keystore path
+        :param password: set password from keystore and used also as entropy for CSPRNG
+        :return: created wallet object and saved keystore path
         """
-        wallet = Wallet(configuration).create(extra_entropy)
-        wallet.save_keystore(keystore_password)
+        wallet = Wallet(configuration).create(password)
+        wallet.save_keystore(password)
+
+        return wallet
+
+    @staticmethod
+    def restore_wallet(configuration, mnemonic_sentence, passphrase):
+        """
+        Create new wallet account and save encrypted keystore
+        :param configuration: loaded configuration file instance
+        :param mnemonic_sentence: user's mnemonic sentence to restore wallet
+        :param password: set password from keystore and used also as entropy for CSPRNG
+        :return: restored wallet object and saved keystore path
+        """
+        wallet = Wallet(configuration).restore(mnemonic_sentence, passphrase)
+        wallet.save_keystore(passphrase)
 
         return wallet
 
