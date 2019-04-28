@@ -78,15 +78,21 @@ class WalletAPI:
         return address, pub_key
 
     @staticmethod
-    def get_balance(configuration):
+    def get_balance(configuration, token_symbol=None):
         """
         Get balance from account address.
         :param configuration: loaded configuration file instance
+        :param token_symbol: None for ETH, ERC20 symbol for other tokens
         :return:
         """
-        address = Wallet(configuration).get_address()
-        eth_balance = Wallet(configuration).get_balance(address)
-        return eth_balance, address
+        wallet_address = Wallet(configuration).get_address()
+        if token_symbol is None:
+            balance = Wallet(configuration).get_balance(wallet_address)
+        else:
+            contract_address = configuration.contracts[token_symbol]
+            contract = Contract(configuration, contract_address)
+            balance = contract.get_balance(wallet_address)
+        return balance, wallet_address
 
     @staticmethod
     def send_transaction(configuration,
@@ -174,19 +180,6 @@ class WalletAPI:
         :return: dict with tokens
         """
         return configuration.contracts
-
-    # @staticmethod
-    # def get_contract_balance(configuration, symbol):
-    #     """
-    #     Get wallet balance from contract.
-    #     :param configuration: loaded configuration file instance
-    #     :param symbol: symbol of smart contract
-    #     :return: contract balance and address
-    #     """
-    #     address = Wallet(configuration).get_address()
-    #     # contract_balance = Wallet(configuration).get_contract_balance(address)
-    #     contract_balance = Contract().get_contract_balance(address)
-    #     return contract_balance, address
 
     @staticmethod
     def send_contract_transaction():
