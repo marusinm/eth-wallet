@@ -19,6 +19,7 @@ class Configuration:
         keystore_filename='/keystore',
         eth_address='',
         public_key='',
+        contracts={},
     )
 
     def __init__(self,
@@ -83,6 +84,15 @@ class Configuration:
         self.public_key = public_key
         self.__update_configuration('public_key', public_key)
 
+    def add_contract_token(self, contract_symbol, contract_address):
+        """
+        Add ERC20 token to the wallet
+        :param contract_symbol: token symbol
+        :param contract_address: contract address
+        :return:
+        """
+        self.__update_configuration(contract_symbol, contract_address)
+
     def __update_configuration(self, parameter_name, parameter_value):
         """
         Updates configuration file.
@@ -90,21 +100,26 @@ class Configuration:
         :param parameter_value: value to parameter_key
         :return: True if config file updated successfully
         """
+        # with open(self.config_path, 'r') as yaml_file:
+        #     file = yaml.safe_load(yaml_file)
+        #
+        # new_config = self.initial_config
+        # for key, value in file.items():
+        #     if hasattr(new_config, key):
+        #         setattr(new_config, key, value)
+        #
+        # new_config[parameter_name] = parameter_value
+        #
+        # create_directory(self.config_dir)
+        # with open(self.config_path, 'w+') as yaml_file:
+        #     yaml.dump(new_config, yaml_file, default_flow_style=False)
         with open(self.config_path, 'r') as yaml_file:
             file = yaml.safe_load(yaml_file)
 
-        new_config = self.initial_config
-        for key, value in file.items():
-            if hasattr(new_config, key):
-                setattr(new_config, key, value)
-
-        new_config[parameter_name] = parameter_value
+        file[parameter_name] = parameter_value
 
         create_directory(self.config_dir)
         with open(self.config_path, 'w+') as yaml_file:
-            yaml.dump(new_config, yaml_file, default_flow_style=False)
+            yaml.dump(file, yaml_file, default_flow_style=False)
 
         return True
-
-
-# configuration = Configuration()

@@ -1,5 +1,6 @@
 import os
 import errno
+import json
 from eth_utils import (
     keccak,
 )
@@ -45,3 +46,13 @@ def create_directory(dirname):
         except OSError as exc:  # Guard against race condition
             if exc.errno != errno.EEXIST:
                 raise
+
+
+def get_abi_json():
+    """
+    Returns FITCOIN ERC20 token ABI
+    :return:
+    """
+    with open("../erc20/abi.json") as f:
+        fitcoin = json.load(f)
+    return fitcoin

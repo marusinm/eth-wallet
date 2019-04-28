@@ -120,7 +120,7 @@ class WalletAPI:
             to_address=to_address,
             value=Web3.toWei(eth_value, "ether"),
             gas=21000,  # fixed gasLimit to transfer ether from one EOA to another EOA (doesn't include contracts)
-            gas_price=w3.eth.gasPrice,
+            gas_price=w3.eth.gasPrice * 10 * 2,  # *10*2 just for making quicker transaction TODO: simple as MetaMask
             # be careful about sending too much transactions in row, nonce will be duplicated
             nonce=w3.eth.getTransactionCount(wallet.get_address())
         )
@@ -150,4 +150,25 @@ class WalletAPI:
                 break
 
         return tx_hash, transaction_const_eth
+
+    @staticmethod
+    def add_contract():
+        pass
+
+    @staticmethod
+    def get_contract_balance(configuration, symbol):
+        """
+        Get wallet balance from contract.
+        :param configuration: loaded configuration file instance
+        :param symbol: symbol of smart contract
+        :return: contract balance and address
+        """
+        address = Wallet(configuration).get_address()
+        # contract_balance = Wallet(configuration).get_contract_balance(address)
+        contract_balance = Contract().get_contract_balance(address)
+        return contract_balance, address
+
+    @staticmethod
+    def send_contract_transaction():
+        pass
 

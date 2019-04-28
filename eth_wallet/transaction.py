@@ -4,6 +4,7 @@ from eth_account import (
 
 
 class Transaction:
+    """Abstraction over Ethereum transaction."""
 
     def __init__(self, account, w3):
         self.account = account
