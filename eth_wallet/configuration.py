@@ -19,7 +19,7 @@ class Configuration:
         keystore_filename='/keystore',
         eth_address='',
         public_key='',
-        contracts={},
+        contracts=dict(),
     )
 
     def __init__(self,
@@ -38,6 +38,7 @@ class Configuration:
         self.keystore_filename = ''
         self.eth_address = ''
         self.public_key = ''
+        self.contracts = dict()
 
         # initialize upper variables
         # self.load_configuration()
@@ -91,7 +92,8 @@ class Configuration:
         :param contract_address: contract address
         :return:
         """
-        self.__update_configuration(contract_symbol, contract_address)
+        self.contracts[contract_symbol] = contract_address
+        self.__update_configuration('contracts', self.contracts)
 
     def __update_configuration(self, parameter_name, parameter_value):
         """
@@ -100,19 +102,6 @@ class Configuration:
         :param parameter_value: value to parameter_key
         :return: True if config file updated successfully
         """
-        # with open(self.config_path, 'r') as yaml_file:
-        #     file = yaml.safe_load(yaml_file)
-        #
-        # new_config = self.initial_config
-        # for key, value in file.items():
-        #     if hasattr(new_config, key):
-        #         setattr(new_config, key, value)
-        #
-        # new_config[parameter_name] = parameter_value
-        #
-        # create_directory(self.config_dir)
-        # with open(self.config_path, 'w+') as yaml_file:
-        #     yaml.dump(new_config, yaml_file, default_flow_style=False)
         with open(self.config_path, 'r') as yaml_file:
             file = yaml.safe_load(yaml_file)
 

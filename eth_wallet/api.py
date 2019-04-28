@@ -13,6 +13,9 @@ from eth_wallet.exceptions import (
     InsufficientFundsException,
     InvalidValueException,
 )
+from eth_wallet.contract import (
+    Contract,
+)
 from web3.exceptions import (
     InvalidAddress,
 )
@@ -152,21 +155,38 @@ class WalletAPI:
         return tx_hash, transaction_const_eth
 
     @staticmethod
-    def add_contract():
-        pass
+    def add_contract(configuration, contract_symbol, contract_address):
+        """
+        Adds new contract ERC20 token into config file with symbol and address
+        :param configuration: configuration file
+        :param contract_symbol: contract symbol
+        :param contract_address: contract address
+        :return:
+        """
+        contract = Contract(configuration, contract_address)
+        contract.add_new_contract(contract_symbol, contract_address)
 
     @staticmethod
-    def get_contract_balance(configuration, symbol):
+    def list_tokens(configuration):
         """
-        Get wallet balance from contract.
-        :param configuration: loaded configuration file instance
-        :param symbol: symbol of smart contract
-        :return: contract balance and address
+        List all added tokens from configuration file
+        :param configuration: config file
+        :return: dict with tokens
         """
-        address = Wallet(configuration).get_address()
-        # contract_balance = Wallet(configuration).get_contract_balance(address)
-        contract_balance = Contract().get_contract_balance(address)
-        return contract_balance, address
+        return configuration.contracts
+
+    # @staticmethod
+    # def get_contract_balance(configuration, symbol):
+    #     """
+    #     Get wallet balance from contract.
+    #     :param configuration: loaded configuration file instance
+    #     :param symbol: symbol of smart contract
+    #     :return: contract balance and address
+    #     """
+    #     address = Wallet(configuration).get_address()
+    #     # contract_balance = Wallet(configuration).get_contract_balance(address)
+    #     contract_balance = Contract().get_contract_balance(address)
+    #     return contract_balance, address
 
     @staticmethod
     def send_contract_transaction():

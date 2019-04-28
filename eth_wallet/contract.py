@@ -10,10 +10,10 @@ from eth_wallet.utils import (
 class Contract:
     """Abstraction over ERC20 tokens"""
 
-    fitcoin_address = '0x19896cB57Bc5B4cb92dbC7D389DBa6290AF505Ce'
-    binancecoin_address = '0x64BBF67A8251F7482330C33E65b08B835125e018'
-    my_address = '0xc3519C4560BcfE3Ac0b137f1067d1655ed65FEa4'
-    metamask_address = '0xAAD533eb7Fe7F2657960AC7703F87E10c73ae73b'
+    # fitcoin_address = '0x19896cB57Bc5B4cb92dbC7D389DBa6290AF505Ce'
+    # binancecoin_address = '0x64BBF67A8251F7482330C33E65b08B835125e018'
+    # my_address = '0xc3519C4560BcfE3Ac0b137f1067d1655ed65FEa4'
+    # metamask_address = '0xAAD533eb7Fe7F2657960AC7703F87E10c73ae73b'
 
     def __init__(self, configuration, address):
         """

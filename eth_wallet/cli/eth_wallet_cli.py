@@ -17,6 +17,12 @@ from eth_wallet.cli.send_transaction import (
 from eth_wallet.cli.restore_wallet import (
     restore_wallet,
 )
+from eth_wallet.cli.add_token import (
+    add_token,
+)
+from eth_wallet.cli.list_tokens import (
+    list_tokens,
+)
 
 
 @click.group()
@@ -30,6 +36,8 @@ eth_wallet_cli.add_command(reveal_seed)
 eth_wallet_cli.add_command(get_balance)
 eth_wallet_cli.add_command(send_transaction)
 eth_wallet_cli.add_command(restore_wallet)
+eth_wallet_cli.add_command(add_token)
+eth_wallet_cli.add_command(list_tokens)
 
 if __name__ == "__main__":
     eth_wallet_cli()
