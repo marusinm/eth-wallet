@@ -46,6 +46,20 @@ class Contract:
         """
         return self.contract.functions.balanceOf(wallet_address).call() / (10 ** self.contract_decimals)
 
+    def get_decimals(self):
+        """
+        Returns the number of decimals
+        :return: integer
+        """
+        return self.contract_decimals
+
+    def get_erc20_contract(self):
+        """
+        Returns w3.eth.contract instance
+        :return:
+        """
+        return self.contract
+
 
 # w3 = Infura().get_web3()
 #

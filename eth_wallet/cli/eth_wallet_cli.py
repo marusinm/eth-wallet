@@ -23,6 +23,9 @@ from eth_wallet.cli.add_token import (
 from eth_wallet.cli.list_tokens import (
     list_tokens,
 )
+from eth_wallet.cli.network import (
+    network,
+)
 
 
 @click.group()
@@ -38,6 +41,7 @@ eth_wallet_cli.add_command(send_transaction)
 eth_wallet_cli.add_command(restore_wallet)
 eth_wallet_cli.add_command(add_token)
 eth_wallet_cli.add_command(list_tokens)
+eth_wallet_cli.add_command(network)
 
 if __name__ == "__main__":
     eth_wallet_cli()

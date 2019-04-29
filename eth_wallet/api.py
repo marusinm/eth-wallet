@@ -54,6 +54,15 @@ class WalletAPI:
         return wallet
 
     @staticmethod
+    def get_network(configuration):
+        """
+        Returns connected network (Mainnet, Ropsten ...)
+        :param configuration: loaded configuration file instance
+        :return: network number defined in EIP155
+        """
+        return configuration.network
+
+    @staticmethod
     def get_private_key(configuration, keystore_password):
         """
         Get account private key from default keystore location
@@ -98,13 +107,15 @@ class WalletAPI:
     def send_transaction(configuration,
                          keystore_password,
                          to_address,
-                         eth_value):
+                         value,
+                         token_symbol=None):
         """
         Sign and send transaction
         :param configuration: loaded configuration file instance
         :param keystore_password: password from encrypted keystore with private key for transaction sign
         :param to_address: address in hex string where originator's funds will be sent
-        :param eth_value: amount of funds to send in ETH
+        :param value: amount of funds to send in ETH or token defined in token_symbol
+        :param token_symbol: None for ETH, ERC20 symbol for other tokens transaction
         :return: tuple of transaction hash and transaction cost
         """
         # this wallet address: 0x36De5DCb6461F67F4fb742D494F38eeE87316655
@@ -120,19 +131,34 @@ class WalletAPI:
 
         # check if value to send is possible to convert number
         try:
-            float(eth_value)
+            float(value)
         except ValueError:
             raise InvalidValueException()
 
-        # create transaction dict
-        tx_dict = transaction.build_transaction(
-            to_address=to_address,
-            value=Web3.toWei(eth_value, "ether"),
-            gas=21000,  # fixed gasLimit to transfer ether from one EOA to another EOA (doesn't include contracts)
-            gas_price=w3.eth.gasPrice * 10 * 2,  # *10*2 just for making quicker transaction TODO: simple as MetaMask
-            # be careful about sending too much transactions in row, nonce will be duplicated
-            nonce=w3.eth.getTransactionCount(wallet.get_address())
-        )
+        if token_symbol is None:
+            # create ETH transaction dict
+            tx_dict = transaction.build_transaction(
+                to_address=to_address,
+                value=Web3.toWei(value, "ether"),
+                gas=21000,  # fixed gasLimit to transfer ether from one EOA to another EOA (doesn't include contracts)
+                gas_price=w3.eth.gasPrice * 10 * 2,  # *10*2 just for making quicker transaction TODO: simple as MetaMask
+                # be careful about sending too much transactions in row, nonce will be duplicated
+                nonce=w3.eth.getTransactionCount(wallet.get_address()),
+                chain_id=configuration.network
+            )
+        else:
+            # create ERC20 contract transaction dict
+            contract_address = configuration.contracts[token_symbol]
+            contract = Contract(configuration, contract_address)
+            token = contract.get_erc20_contract()
+            erc20_decimals = contract.get_decimals()
+            tx_dict = token.functions.transfer(to_address, value * (10**erc20_decimals)).buildTransaction({
+                'chainId': 3,  # Ropsten
+                'gas': 140000,  # TODO
+                'gasPrice': w3.toWei('40', 'gwei'),  # TODO
+                # 'gasPrice': w3.eth.gasPrice * 10 * 2,
+                'nonce': w3.eth.getTransactionCount(wallet.get_address())
+            })
 
         # check whether to address is valid checksum address
         if not Web3.isChecksumAddress(to_address):
@@ -142,7 +168,7 @@ class WalletAPI:
         balance, _ = WalletAPI.get_balance(configuration)
         transaction_const_wei = tx_dict['gas'] * tx_dict['gasPrice']
         transaction_const_eth = w3.fromWei(transaction_const_wei, 'ether')
-        if (transaction_const_eth + Decimal(eth_value)) > balance:
+        if (transaction_const_eth + Decimal(value)) > balance:
             raise InsufficientFundsException()
 
         # send transaction
@@ -179,9 +205,5 @@ class WalletAPI:
         :param configuration: config file
         :return: dict with tokens
         """
-        return configuration.contracts
-
-    @staticmethod
-    def send_contract_transaction():
-        pass
+        return configuration.contractsa
 

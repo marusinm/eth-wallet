@@ -16,7 +16,7 @@ class Transaction:
                           gas,
                           gas_price,
                           nonce,
-                          chain_id=3  # chain_id=3 for Ropsten test network
+                          chain_id
                           ):
         """Collects all necessary data to build transaction dict."""
         transaction = {

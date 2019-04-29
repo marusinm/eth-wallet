@@ -10,6 +10,10 @@ class Configuration:
     """
     Module for working with configuration file.
     """
+    # Networks defined in https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md#specification
+    MAIN_NETWORK_ID = 1
+    ROPSTEN_NETWORK_ID = 3
+
     # By default user’s home location ./eth-wallet directory is where to save config file
     config_dir = os.path.expanduser('~') + '/.eth-wallet'
     config_file = '/config.yaml'
@@ -19,6 +23,7 @@ class Configuration:
         keystore_filename='/keystore',
         eth_address='',
         public_key='',
+        network=ROPSTEN_NETWORK_ID,  # default network where to connect app
         contracts=dict(),
     )
 
@@ -34,6 +39,7 @@ class Configuration:
         self.initial_config = initial_config
 
         # Variables from configuration file. They will be initialized after load_configuration() call
+        self.network = ''
         self.keystore_location = ''
         self.keystore_filename = ''
         self.eth_address = ''
