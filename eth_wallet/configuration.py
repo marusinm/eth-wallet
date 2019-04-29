@@ -46,9 +46,6 @@ class Configuration:
         self.public_key = ''
         self.contracts = dict()
 
-        # initialize upper variables
-        # self.load_configuration()
-
     def load_configuration(self):
         """Load bot configuration from .yaml file"""
         if not is_file(self.config_path):
@@ -58,7 +55,6 @@ class Configuration:
             with open(self.config_path, 'r') as yaml_file:
                 file = yaml.safe_load(yaml_file)
             for key, value in file.items():
-                # if hasattr(self, key):
                 setattr(self, key, value)
         return self
 
