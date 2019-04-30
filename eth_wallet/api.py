@@ -108,7 +108,9 @@ class WalletAPI:
                          keystore_password,
                          to_address,
                          value,
-                         token_symbol=None):
+                         token_symbol=None,
+                         gas_price_speed=20  # MetaMask default transaction speedup is gasPrice*10
+                         ):
         """
         Sign and send transaction
         :param configuration: loaded configuration file instance
@@ -116,12 +118,9 @@ class WalletAPI:
         :param to_address: address in hex string where originator's funds will be sent
         :param value: amount of funds to send in ETH or token defined in token_symbol
         :param token_symbol: None for ETH, ERC20 symbol for other tokens transaction
+        :param gas_price_speed: gas price will be multiplied with this number to speed up transaction
         :return: tuple of transaction hash and transaction cost
         """
-        # this wallet address: 0x36De5DCb6461F67F4fb742D494F38eeE87316655
-        # my metamask address: 0xAAD533eb7Fe7F2657960AC7703F87E10c73ae73b
-        # my metamask address: 0xaad533eb7fe7f2657960ac7703f87e10c73ae73b
-        # current transaction fee is: 0.000021ETH
         wallet = Wallet(configuration).load_keystore(keystore_password)
         w3 = Infura().get_web3()
         transaction = Transaction(
@@ -129,46 +128,62 @@ class WalletAPI:
             w3=w3
         )
 
-        # check if value to send is possible to convert number
+        # check if value to send is possible to convert to the number
         try:
             float(value)
         except ValueError:
             raise InvalidValueException()
 
-        if token_symbol is None:
-            # create ETH transaction dict
+        if token_symbol is None:  # create ETH transaction dictionary
             tx_dict = transaction.build_transaction(
                 to_address=to_address,
                 value=Web3.toWei(value, "ether"),
                 gas=21000,  # fixed gasLimit to transfer ether from one EOA to another EOA (doesn't include contracts)
-                gas_price=w3.eth.gasPrice * 10 * 2,  # *10*2 just for making quicker transaction TODO: simple as MetaMask
-                # be careful about sending too much transactions in row, nonce will be duplicated
+                gas_price=w3.eth.gasPrice * gas_price_speed,
+                # be careful about sending more transactions in row, nonce will be duplicated
                 nonce=w3.eth.getTransactionCount(wallet.get_address()),
                 chain_id=configuration.network
             )
-        else:
-            # create ERC20 contract transaction dict
+        else:  # create ERC20 contract transaction dictionary
             contract_address = configuration.contracts[token_symbol]
             contract = Contract(configuration, contract_address)
-            token = contract.get_erc20_contract()
             erc20_decimals = contract.get_decimals()
+            token_amount = int(value) * (10 ** erc20_decimals)  # TODO try with float instead of integer
+            data_for_contract = Transaction.get_tx_erc20_data_field(to_address, token_amount)
 
-            # guess how much gas I need
+            # calculate how much gas I need, unused gas is returned to the wallet
             estimated_gas = w3.eth.estimateGas(
                 {'to': contract_address,
                  'from': wallet.get_address(),
-                 'data': '0xa9059cbb'  # 4bytes of contracts called function
-                         '000000000000000000000000aad533eb7fe7f2657960ac7703f87e10c73ae73b'  # recipient address
-                         '0000000000000000000000000000000000000000000000000de0b6b3a7640000'  # hash of sending amount
+                 'data': data_for_contract
                  })
 
-            tx_dict = token.functions.transfer(to_address, int(value) * (10**erc20_decimals)).buildTransaction({
-                'chainId': configuration.network,
-                'gas': estimated_gas,  # TODO
-                # 'gas': 2000000,  # TODO
-                'gasPrice': w3.eth.gasPrice * 10 * 2,
-                'nonce': w3.eth.getTransactionCount(wallet.get_address())
-            })
+            tx_dict = transaction.build_transaction(
+                to_address=contract_address,  # receiver address is defined in data field for this contract
+                value=0,  # amount of tokens to send is defined in data field for contract
+                gas=estimated_gas,
+                gas_price=w3.eth.gasPrice * gas_price_speed,
+                # be careful about sending more transactions in row, nonce will be duplicated
+                nonce=w3.eth.getTransactionCount(wallet.get_address()),
+                chain_id=configuration.network,
+                data=data_for_contract
+            )
+
+            # token = contract.get_erc20_contract()  # TODO delete if bellow code is deleted too
+            # estimated_gas = w3.eth.estimateGas(
+            #     {'to': contract_address,
+            #      'from': wallet.get_address(),
+            #      'data': '0xa9059cbb'  # 4bytes of contracts called function
+            #              '000000000000000000000000aad533eb7fe7f2657960ac7703f87e10c73ae73b'  # recipient address
+            #              '0000000000000000000000000000000000000000000000000de0b6b3a7640000'  # hash of sending amount
+            #      })
+
+            # tx_dict = token.functions.transfer(to_address, token_amount).buildTransaction({
+            #     'chainId': configuration.network,
+            #     'gas': estimated_gas,
+            #     'gasPrice': w3.eth.gasPrice * 10 * 2,  # TODO
+            #     'nonce': w3.eth.getTransactionCount(wallet.get_address())
+            # })
 
         # check whether to address is valid checksum address
         if not Web3.isChecksumAddress(to_address):

@@ -28,15 +28,27 @@ class Transaction:
                           data=None
                           ):
         """Collects all necessary data to build transaction dict."""
-        transaction = {
-            # Note that the address must be in checksum format:
-            'to': to_address,
-            'value': value,
-            'gas': gas,
-            'gasPrice': gas_price,
-            'nonce': nonce,
-            'chainId': chain_id
-        }
+        if data is None:  # tx dict for sending ETH
+            transaction = {
+                # Note that the address must be in checksum format:
+                'to': to_address,
+                'value': value,
+                'gas': gas,
+                'gasPrice': gas_price,
+                'nonce': nonce,
+                'chainId': chain_id
+            }
+        else:  # tx dict for sending ERC20 tokens
+            transaction = {
+                # Note that the address must be in checksum format:
+                'to': to_address,
+                'value': value,
+                'gas': gas,
+                'gasPrice': gas_price,
+                'nonce': nonce,
+                'chainId': chain_id,
+                'data': data
+            }
 
         return transaction
 
@@ -92,7 +104,7 @@ class Transaction:
         # example: de0b6b3a7640000 (hex of 1000000000000000000)
         value = remove_0x_prefix(to_hex(value))
 
-        # 4. add zeros in front of amount of hex value. Together it must be 32 bytes (length 64)
+        # 4. add zeros in front of sending amount of hex value. Together it must be 32 bytes (length 64)
         # example: 0000000000000000000000000000000000000000000000000de0b6b3a7640000
         zero_end_point = 64 - len(value)
         final_hex_amount = [value[x - zero_end_point] if x >= zero_end_point else 0 for x in range(0, 64)]
