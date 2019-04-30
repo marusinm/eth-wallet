@@ -155,23 +155,17 @@ class WalletAPI:
 
             # guess how much gas I need
             estimated_gas = w3.eth.estimateGas(
-                {'to': to_address,
+                {'to': contract_address,
                  'from': wallet.get_address(),
                  'data': '0xa9059cbb'  # 4bytes of contracts called function
                          '000000000000000000000000aad533eb7fe7f2657960ac7703f87e10c73ae73b'  # recipient address
                          '0000000000000000000000000000000000000000000000000de0b6b3a7640000'  # hash of sending amount
                  })
 
-            print('erc decimals: ', erc20_decimals)
-            print('estimated gas: ', estimated_gas)
-            print('to address: ', to_address)
-            print('value to send: ', int(value) * (10**18))
-            print('network: ', configuration.network)
-
-            tx_dict = token.functions.transfer(to_address, int(value) * (10**18)).buildTransaction({
+            tx_dict = token.functions.transfer(to_address, int(value) * (10**erc20_decimals)).buildTransaction({
                 'chainId': configuration.network,
-                # 'gas': estimated_gas,  # TODO
-                'gas': 2000000,  # TODO
+                'gas': estimated_gas,  # TODO
+                # 'gas': 2000000,  # TODO
                 'gasPrice': w3.eth.gasPrice * 10 * 2,
                 'nonce': w3.eth.getTransactionCount(wallet.get_address())
             })
@@ -221,5 +215,5 @@ class WalletAPI:
         :param configuration: config file
         :return: dict with tokens
         """
-        return configuration.contractsa
+        return configuration.contracts
 
