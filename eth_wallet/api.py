@@ -121,6 +121,7 @@ class WalletAPI:
         :param gas_price_speed: gas price will be multiplied with this number to speed up transaction
         :return: tuple of transaction hash and transaction cost
         """
+        # my MetaMask address: 0xAAD533eb7Fe7F2657960AC7703F87E10c73ae73b
         wallet = Wallet(configuration).load_keystore(keystore_password)
         w3 = Infura().get_web3()
         transaction = Transaction(
@@ -168,22 +169,6 @@ class WalletAPI:
                 chain_id=configuration.network,
                 data=data_for_contract
             )
-
-            # token = contract.get_erc20_contract()  # TODO delete if bellow code is deleted too
-            # estimated_gas = w3.eth.estimateGas(
-            #     {'to': contract_address,
-            #      'from': wallet.get_address(),
-            #      'data': '0xa9059cbb'  # 4bytes of contracts called function
-            #              '000000000000000000000000aad533eb7fe7f2657960ac7703f87e10c73ae73b'  # recipient address
-            #              '0000000000000000000000000000000000000000000000000de0b6b3a7640000'  # hash of sending amount
-            #      })
-
-            # tx_dict = token.functions.transfer(to_address, token_amount).buildTransaction({
-            #     'chainId': configuration.network,
-            #     'gas': estimated_gas,
-            #     'gasPrice': w3.eth.gasPrice * 10 * 2,  # TODO
-            #     'nonce': w3.eth.getTransactionCount(wallet.get_address())
-            # })
 
         # check whether to address is valid checksum address
         if not Web3.isChecksumAddress(to_address):
