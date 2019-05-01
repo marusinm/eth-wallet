@@ -31,17 +31,44 @@ Add new ERC20 contract:
 $ eth-wallet add-token
   Contract address []: 0x70a68593BAfc497AC4F24Eaf13CF68E74135bA42
   Token symbol []: ZRX
+  
 New coin was added! ZRX 0x70a68593BAfc497AC4F24Eaf13CF68E74135bA42
 ```
 Get balance of ERC20 token:
 ```
 $ eth-wallet get-balance --token ZRX
 Balance on address 0xB1f761734F00d1D368Ce6f82F755bBb3005538EB is: 0.0ZRX
-
 ```
 
 ### Transactions
-TODO:
+Send ether to another wallet
+```
+$ eth-wallet send-transaction 
+  To address: []: 0xAAD533eb7Fe7F2657960AC7703F87E10c73ae73b
+  Value to send: []: 0.01
+  Password from keystore: 
+
+transaction: {'to': '0xAAD533eb7Fe7F2657960AC7703F87E10c73ae73b', 'value': 10000000000000000, 'gas': 21000, 'gasPrice': 20000000000, 'nonce': 0, 'chainId': 3}
+Pending.................
+Transaction mined!
+Hash of the transaction: 0x193919d1ad2dc024349ccc035a15a697987bd33e1ff04e33f878e6f89f2ebbdf
+Transaction cost was: 0.00042ETH
+```
+
+Send ERC20 contract tokens to another wallet
+```commandline
+eth-wallet send-transaction --token FIT
+To address: []: 0xAAD533eb7Fe7F2657960AC7703F87E10c73ae73b
+Value to send: []: 0.9
+Password from keystore:
+ 
+transaction: {'to': '0x19896cB57Bc5B4cb92dbC7D389DBa6290AF505Ce', 'value': 0, 'gas': 36536, 'gasPrice': 20000000000, 'nonce': 2, 'chainId': 3, 'data': '0xa9059cbb000000000000000000000000aad533eb7fe7f2657960ac7703f87e10c73ae73b0000000000000000000000000000000000000000000000000c7d713b49da0000'}
+Pending......................
+Transaction mined!
+Hash of the transaction: 0x118556d192c2efb13ade6ccc2f18a631e14256972af9f7ec8a67067aaafc978c
+Transaction cost was: 0.00073072ETH
+
+```
 
 ### Wallet utils
 Show connected network:
@@ -70,5 +97,6 @@ Reveal wallet master private key:
 ```
 $ eth-wallet reveal-seed   
   Password from keystore: 
+  
 Account prv key: 0x843844a23e3ae7b6a695a346c981484b554ff1718299b0b42df3045f04b94f05
 ```

@@ -12,6 +12,7 @@ from eth_wallet.infura import (
 from eth_wallet.exceptions import (
     InsufficientFundsException,
     InvalidValueException,
+    InsufficientERC20FundsException,
 )
 from eth_wallet.contract import (
     Contract,
@@ -149,8 +150,13 @@ class WalletAPI:
             contract_address = configuration.contracts[token_symbol]
             contract = Contract(configuration, contract_address)
             erc20_decimals = contract.get_decimals()
-            token_amount = int(value) * (10 ** erc20_decimals)  # TODO try with float instead of integer
+            token_amount = int(float(value) * (10 ** erc20_decimals))
             data_for_contract = Transaction.get_tx_erc20_data_field(to_address, token_amount)
+
+            # check whether there is sufficient ERC20 token balance
+            erc20_balance, _ = WalletAPI.get_balance(configuration, token_symbol)
+            if float(value) > erc20_balance:
+                raise InsufficientERC20FundsException()
 
             # calculate how much gas I need, unused gas is returned to the wallet
             estimated_gas = w3.eth.estimateGas(
@@ -174,12 +180,16 @@ class WalletAPI:
         if not Web3.isChecksumAddress(to_address):
             raise InvalidAddress()
 
-        # check whether there is sufficient balance for this transaction
+        # check whether there is sufficient eth balance for this transaction
         balance, _ = WalletAPI.get_balance(configuration)
         transaction_const_wei = tx_dict['gas'] * tx_dict['gasPrice']
         transaction_const_eth = w3.fromWei(transaction_const_wei, 'ether')
-        if (transaction_const_eth + Decimal(value)) > balance:
-            raise InsufficientFundsException()
+        if token_symbol is None:
+            if (transaction_const_eth + Decimal(value)) > balance:
+                raise InsufficientFundsException()
+        else:
+            if transaction_const_eth > balance:
+                raise InsufficientFundsException()
 
         # send transaction
         tx_hash = transaction.send_transaction(tx_dict)

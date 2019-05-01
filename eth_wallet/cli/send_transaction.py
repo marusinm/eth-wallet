@@ -11,6 +11,7 @@ from eth_wallet.exceptions import (
     InvalidValueException,
     InvalidPasswordException,
     InfuraErrorException,
+    InsufficientERC20FundsException,
 )
 from web3.exceptions import (
     InvalidAddress,
@@ -51,7 +52,9 @@ def send_transaction(to, value, token):
         click.echo('Transaction cost was: %sETH' % str(tx_cost_eth))
 
     except InsufficientFundsException:
-        click.echo('Insufficient funds! Check balance on your address.')
+        click.echo('Insufficient ETH funds! Check balance on your address.')
+    except InsufficientERC20FundsException:
+        click.echo('Insufficient ERC20 token funds! Check balance on your address.')
     except InvalidAddress:
         click.echo('Invalid recipient(to) address!')
     except InvalidValueException:

@@ -5,6 +5,14 @@ class InsufficientFundsException(Exception):
     pass
 
 
+class InsufficientERC20FundsException(Exception):
+    """
+    Raised when user want to send ERC20 contract tokens and have insufficient balance
+    of these tokens on wallet's address
+    """
+    pass
+
+
 class InvalidTransactionNonceException(Exception):
     """
     Raised when duplicated nonce occur or any other problem with nonce
