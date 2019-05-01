@@ -14,20 +14,21 @@ from eth_wallet.exceptions import (
 
 
 @click.command()
-@click.option('-t', '--token', default=None,
+@click.option('-c', '--contract', default='', prompt='Contract address',
+              help='Contract address.')
+@click.option('-s', '--symbol', default='', prompt='Token symbol',
               help='Token symbol.')
-def get_balance(token):
-    """Get address balance."""
+def add_token(contract, symbol):
+    """Add new ERC20 contract."""
     configuration = Configuration().load_configuration()
     api = get_api()
+
+    # TODO: test with bad contract and wallet address
+    # fitcoin_address = '0x19896cB57Bc5B4cb92dbC7D389DBa6290AF505Ce'
+    # binancecoin_address = '0x64BBF67A8251F7482330C33E65b08B835125e018'
     try:
-        if token is None:
-            eth_balance, address = api.get_balance(configuration)
-            click.echo('Balance on address %s is: %sETH' % (address, eth_balance))
-        else:
-            # TODO keyerror when token doesnt' exists
-            token_balance, address = api.get_balance(configuration, token)
-            click.echo('Balance on address %s is: %s%s' % (address, token_balance, token))
+        api.add_contract(configuration, symbol, contract)
+        click.echo('New coin was added! %s %s' % (symbol, contract))
     except InvalidAddress:
         click.echo('Invalid address or wallet does not exist!')
     except InfuraErrorException:

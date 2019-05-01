@@ -12,6 +12,10 @@ from eth_wallet.infura import (
 from eth_wallet.exceptions import (
     InsufficientFundsException,
     InvalidValueException,
+    InsufficientERC20FundsException,
+)
+from eth_wallet.contract import (
+    Contract,
 )
 from web3.exceptions import (
     InvalidAddress,
@@ -51,6 +55,15 @@ class WalletAPI:
         return wallet
 
     @staticmethod
+    def get_network(configuration):
+        """
+        Returns connected network (Mainnet, Ropsten ...)
+        :param configuration: loaded configuration file instance
+        :return: network number defined in EIP155
+        """
+        return configuration.network
+
+    @staticmethod
     def get_private_key(configuration, keystore_password):
         """
         Get account private key from default keystore location
@@ -75,33 +88,41 @@ class WalletAPI:
         return address, pub_key
 
     @staticmethod
-    def get_balance(configuration):
+    def get_balance(configuration, token_symbol=None):
         """
         Get balance from account address.
         :param configuration: loaded configuration file instance
+        :param token_symbol: None for ETH, ERC20 symbol for other tokens
         :return:
         """
-        address = Wallet(configuration).get_address()
-        eth_balance = Wallet(configuration).get_balance(address)
-        return eth_balance, address
+        wallet_address = Wallet(configuration).get_address()
+        if token_symbol is None:
+            balance = Wallet(configuration).get_balance(wallet_address)
+        else:
+            contract_address = configuration.contracts[token_symbol]
+            contract = Contract(configuration, contract_address)
+            balance = contract.get_balance(wallet_address)
+        return balance, wallet_address
 
     @staticmethod
     def send_transaction(configuration,
                          keystore_password,
                          to_address,
-                         eth_value):
+                         value,
+                         token_symbol=None,
+                         gas_price_speed=20  # MetaMask default transaction speedup is gasPrice*10
+                         ):
         """
         Sign and send transaction
         :param configuration: loaded configuration file instance
         :param keystore_password: password from encrypted keystore with private key for transaction sign
         :param to_address: address in hex string where originator's funds will be sent
-        :param eth_value: amount of funds to send in ETH
+        :param value: amount of funds to send in ETH or token defined in token_symbol
+        :param token_symbol: None for ETH, ERC20 symbol for other tokens transaction
+        :param gas_price_speed: gas price will be multiplied with this number to speed up transaction
         :return: tuple of transaction hash and transaction cost
         """
-        # this wallet address: 0x36De5DCb6461F67F4fb742D494F38eeE87316655
-        # my metamask address: 0xAAD533eb7Fe7F2657960AC7703F87E10c73ae73b
-        # my metamask address: 0xaad533eb7fe7f2657960ac7703f87e10c73ae73b
-        # current transaction fee is: 0.000021ETH
+        # my MetaMask address: 0xAAD533eb7Fe7F2657960AC7703F87E10c73ae73b
         wallet = Wallet(configuration).load_keystore(keystore_password)
         w3 = Infura().get_web3()
         transaction = Transaction(
@@ -109,32 +130,66 @@ class WalletAPI:
             w3=w3
         )
 
-        # check if value to send is possible to convert number
+        # check if value to send is possible to convert to the number
         try:
-            float(eth_value)
+            float(value)
         except ValueError:
             raise InvalidValueException()
 
-        # create transaction dict
-        tx_dict = transaction.build_transaction(
-            to_address=to_address,
-            value=Web3.toWei(eth_value, "ether"),
-            gas=21000,  # fixed gasLimit to transfer ether from one EOA to another EOA (doesn't include contracts)
-            gas_price=w3.eth.gasPrice,
-            # be careful about sending too much transactions in row, nonce will be duplicated
-            nonce=w3.eth.getTransactionCount(wallet.get_address())
-        )
+        if token_symbol is None:  # create ETH transaction dictionary
+            tx_dict = transaction.build_transaction(
+                to_address=to_address,
+                value=Web3.toWei(value, "ether"),
+                gas=21000,  # fixed gasLimit to transfer ether from one EOA to another EOA (doesn't include contracts)
+                gas_price=w3.eth.gasPrice * gas_price_speed,
+                # be careful about sending more transactions in row, nonce will be duplicated
+                nonce=w3.eth.getTransactionCount(wallet.get_address()),
+                chain_id=configuration.network
+            )
+        else:  # create ERC20 contract transaction dictionary
+            contract_address = configuration.contracts[token_symbol]
+            contract = Contract(configuration, contract_address)
+            erc20_decimals = contract.get_decimals()
+            token_amount = int(float(value) * (10 ** erc20_decimals))
+            data_for_contract = Transaction.get_tx_erc20_data_field(to_address, token_amount)
+
+            # check whether there is sufficient ERC20 token balance
+            erc20_balance, _ = WalletAPI.get_balance(configuration, token_symbol)
+            if float(value) > erc20_balance:
+                raise InsufficientERC20FundsException()
+
+            # calculate how much gas I need, unused gas is returned to the wallet
+            estimated_gas = w3.eth.estimateGas(
+                {'to': contract_address,
+                 'from': wallet.get_address(),
+                 'data': data_for_contract
+                 })
+
+            tx_dict = transaction.build_transaction(
+                to_address=contract_address,  # receiver address is defined in data field for this contract
+                value=0,  # amount of tokens to send is defined in data field for contract
+                gas=estimated_gas,
+                gas_price=w3.eth.gasPrice * gas_price_speed,
+                # be careful about sending more transactions in row, nonce will be duplicated
+                nonce=w3.eth.getTransactionCount(wallet.get_address()),
+                chain_id=configuration.network,
+                data=data_for_contract
+            )
 
         # check whether to address is valid checksum address
         if not Web3.isChecksumAddress(to_address):
             raise InvalidAddress()
 
-        # check whether there is sufficient balance for this transaction
+        # check whether there is sufficient eth balance for this transaction
         balance, _ = WalletAPI.get_balance(configuration)
         transaction_const_wei = tx_dict['gas'] * tx_dict['gasPrice']
         transaction_const_eth = w3.fromWei(transaction_const_wei, 'ether')
-        if (transaction_const_eth + Decimal(eth_value)) > balance:
-            raise InsufficientFundsException()
+        if token_symbol is None:
+            if (transaction_const_eth + Decimal(value)) > balance:
+                raise InsufficientFundsException()
+        else:
+            if transaction_const_eth > balance:
+                raise InsufficientFundsException()
 
         # send transaction
         tx_hash = transaction.send_transaction(tx_dict)
@@ -150,4 +205,25 @@ class WalletAPI:
                 break
 
         return tx_hash, transaction_const_eth
+
+    @staticmethod
+    def add_contract(configuration, contract_symbol, contract_address):
+        """
+        Adds new contract ERC20 token into config file with symbol and address
+        :param configuration: configuration file
+        :param contract_symbol: contract symbol
+        :param contract_address: contract address
+        :return:
+        """
+        contract = Contract(configuration, contract_address)
+        contract.add_new_contract(contract_symbol, contract_address)
+
+    @staticmethod
+    def list_tokens(configuration):
+        """
+        List all added tokens from configuration file
+        :param configuration: config file
+        :return: dict with tokens
+        """
+        return configuration.contracts
 

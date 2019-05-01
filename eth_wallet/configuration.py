@@ -10,6 +10,10 @@ class Configuration:
     """
     Module for working with configuration file.
     """
+    # Networks defined in https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md#specification
+    MAIN_NETWORK_ID = 1
+    ROPSTEN_NETWORK_ID = 3
+
     # By default user’s home location ./eth-wallet directory is where to save config file
     config_dir = os.path.expanduser('~') + '/.eth-wallet'
     config_file = '/config.yaml'
@@ -19,6 +23,8 @@ class Configuration:
         keystore_filename='/keystore',
         eth_address='',
         public_key='',
+        network=ROPSTEN_NETWORK_ID,  # default network where to connect app
+        contracts=dict(),
     )
 
     def __init__(self,
@@ -33,13 +39,12 @@ class Configuration:
         self.initial_config = initial_config
 
         # Variables from configuration file. They will be initialized after load_configuration() call
+        self.network = ''
         self.keystore_location = ''
         self.keystore_filename = ''
         self.eth_address = ''
         self.public_key = ''
-
-        # initialize upper variables
-        # self.load_configuration()
+        self.contracts = dict()
 
     def load_configuration(self):
         """Load bot configuration from .yaml file"""
@@ -50,7 +55,6 @@ class Configuration:
             with open(self.config_path, 'r') as yaml_file:
                 file = yaml.safe_load(yaml_file)
             for key, value in file.items():
-                # if hasattr(self, key):
                 setattr(self, key, value)
         return self
 
@@ -83,6 +87,16 @@ class Configuration:
         self.public_key = public_key
         self.__update_configuration('public_key', public_key)
 
+    def add_contract_token(self, contract_symbol, contract_address):
+        """
+        Add ERC20 token to the wallet
+        :param contract_symbol: token symbol
+        :param contract_address: contract address
+        :return:
+        """
+        self.contracts[contract_symbol] = contract_address
+        self.__update_configuration('contracts', self.contracts)
+
     def __update_configuration(self, parameter_name, parameter_value):
         """
         Updates configuration file.
@@ -93,18 +107,10 @@ class Configuration:
         with open(self.config_path, 'r') as yaml_file:
             file = yaml.safe_load(yaml_file)
 
-        new_config = self.initial_config
-        for key, value in file.items():
-            if hasattr(new_config, key):
-                setattr(new_config, key, value)
-
-        new_config[parameter_name] = parameter_value
+        file[parameter_name] = parameter_value
 
         create_directory(self.config_dir)
         with open(self.config_path, 'w+') as yaml_file:
-            yaml.dump(new_config, yaml_file, default_flow_style=False)
+            yaml.dump(file, yaml_file, default_flow_style=False)
 
         return True
-
-
-# configuration = Configuration()
