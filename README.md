@@ -56,18 +56,17 @@ Transaction cost was: 0.00042ETH
 ```
 
 Send ERC20 contract tokens to another wallet
-```commandline
-eth-wallet send-transaction --token FIT
-To address: []: 0xAAD533eb7Fe7F2657960AC7703F87E10c73ae73b
-Value to send: []: 0.9
-Password from keystore:
+```
+$ eth-wallet send-transaction --token FIT
+  To address: []: 0xAAD533eb7Fe7F2657960AC7703F87E10c73ae73b
+  Value to send: []: 0.9
+  Password from keystore:
  
 transaction: {'to': '0x19896cB57Bc5B4cb92dbC7D389DBa6290AF505Ce', 'value': 0, 'gas': 36536, 'gasPrice': 20000000000, 'nonce': 2, 'chainId': 3, 'data': '0xa9059cbb000000000000000000000000aad533eb7fe7f2657960ac7703f87e10c73ae73b0000000000000000000000000000000000000000000000000c7d713b49da0000'}
 Pending......................
 Transaction mined!
 Hash of the transaction: 0x118556d192c2efb13ade6ccc2f18a631e14256972af9f7ec8a67067aaafc978c
 Transaction cost was: 0.00073072ETH
-
 ```
 
 ### Wallet utils

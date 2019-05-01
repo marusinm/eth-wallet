@@ -38,5 +38,3 @@ class InfuraErrorException(Exception):
     """
     Raised when wallet cannot connect to infura node.
     """
-
-# TODO: network error exception

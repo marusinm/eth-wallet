@@ -17,6 +17,3 @@ def network():
         click.echo('You are connected to the Mainnet network!')
     if chain_id == 3:
         click.echo('You are connected to the Ropsten network!')
-
-
-
