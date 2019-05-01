@@ -1,16 +1,10 @@
 # 1.1.0
 
-* little fixes in code style
-* sending float values in ERC20 transaction
-* Readme update
-* change way how to create erc20 transaction
-* function for creatig data field for erc20 transfer function
-* sending erc20 transaction (missing correct gas price estimation)
-* add network id to the configuration file
-* read erc20 token balance
-* add new erc20 token and list erc20 tokens
-* implementing erc20 (in progress)
-* add mnemonic sentence
+* Add support for ERC20 smart contract manipulation and transactions
+* Gas estimation for sending ERC20 tokens
+* Support of restore wallet with mnemonic sentence (BIP39)
+* It is possible to check on what network is wallet connected (Mainnet/Ropsten/...)
+* Readme update with commands to work control wallet
 
 # 1.0.0
 
