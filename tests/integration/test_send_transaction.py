@@ -1,22 +1,14 @@
 import pytest
-from tests.conftest import(
+from tests.conftest import (
     prepare_conf,
+)
+from tests.cli_tester import (
+    call_eth_wallet,
 )
 from eth_wallet.cli.eth_wallet_cli import(
     eth_wallet_cli,
 )
-from click.testing import(
-    CliRunner,
-)
 
-
-def call_eth_wallet(fnc=None, parameters=None, envs=None):
-    fnc = fnc or eth_wallet_cli
-    runner = CliRunner()
-    envs = envs or {}
-    parameters = parameters or []
-    # catch exceptions enables debugger
-    return runner.invoke(fnc, args=parameters, env=envs, catch_exceptions=False)
 
 @pytest.fixture
 def config(tmp_path, mocker):
