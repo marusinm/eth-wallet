@@ -13,6 +13,7 @@ from eth_wallet.exceptions import (
     InsufficientFundsException,
     InvalidValueException,
     InsufficientERC20FundsException,
+    ERC20NotExistsException,
 )
 from eth_wallet.contract import (
     Contract,
@@ -99,7 +100,10 @@ class WalletAPI:
         if token_symbol is None:
             balance = Wallet(configuration).get_balance(wallet_address)
         else:
-            contract_address = configuration.contracts[token_symbol]
+            try:  # check if token is added to the wallet
+                contract_address = configuration.contracts[token_symbol]
+            except KeyError:
+                raise ERC20NotExistsException()
             contract = Contract(configuration, contract_address)
             balance = contract.get_balance(wallet_address)
         return balance, wallet_address
@@ -147,7 +151,10 @@ class WalletAPI:
                 chain_id=configuration.network
             )
         else:  # create ERC20 contract transaction dictionary
-            contract_address = configuration.contracts[token_symbol]
+            try:  # check if token is added to the wallet
+                contract_address = configuration.contracts[token_symbol]
+            except KeyError:
+                raise ERC20NotExistsException()
             contract = Contract(configuration, contract_address)
             erc20_decimals = contract.get_decimals()
             token_amount = int(float(value) * (10 ** erc20_decimals))

@@ -12,6 +12,7 @@ from eth_wallet.exceptions import (
     InvalidPasswordException,
     InfuraErrorException,
     InsufficientERC20FundsException,
+    ERC20NotExistsException,
 )
 from web3.exceptions import (
     InvalidAddress,
@@ -32,7 +33,6 @@ def send_transaction(to, value, token):
     configuration = Configuration().load_configuration()
     api = get_api()
 
-    # TODO: check if token symbol exists
     try:
         if token is None:
             # send ETH transaction
@@ -63,5 +63,7 @@ def send_transaction(to, value, token):
         click.echo('Incorrect password!')
     except InfuraErrorException:
         click.echo('Wallet is not connected to Ethereum network!')
+    except ERC20NotExistsException:
+        click.echo('This token is not added to the wallet!')
 
 

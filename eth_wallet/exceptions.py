@@ -13,6 +13,13 @@ class InsufficientERC20FundsException(Exception):
     pass
 
 
+class ERC20NotExistsException(Exception):
+    """
+    Raised when user want manipulate with token which doesn't exist in wallet.
+    """
+    pass
+
+
 class InvalidTransactionNonceException(Exception):
     """
     Raised when duplicated nonce occur or any other problem with nonce

@@ -22,7 +22,8 @@ def test_base_help():
 
 
 @pytest.mark.parametrize(
-    "subcommand", ["get-wallet", "reveal-seed", "new-wallet"]
+    "subcommand", ["new-wallet", "get-wallet", "reveal-seed", "send-transaction", "network",
+                   "list-tokens", "add-token", "get-balance"]
 )
 def test_base_subcommand_help(subcommand):
     result = call_eth_wallet(eth_wallet_cli, parameters=[subcommand, "--help"])

@@ -6,8 +6,6 @@ from eth_utils import decode_hex
 
 def test_account(tmp_path):
     test_configuration = prepare_conf(tmp_path)
-    # mocker.patch('eth_wallet.configuration.Configuration.__init__',
-    #              return_value=test_config)
 
     WalletAPI.new_wallet(test_configuration, 'my-password')
     assert len(list(tmp_path.iterdir())) == 2  # one config.yaml and one keystore

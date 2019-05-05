@@ -99,3 +99,8 @@ $ eth-wallet reveal-seed
   
 Account prv key: 0x843844a23e3ae7b6a695a346c981484b554ff1718299b0b42df3045f04b94f05
 ```
+
+TODO: mention `--help`
+TODO: remove Marek from paths as keystore path
+5b56c417303faa3fcba7e57400e120a0ca83ec5a4fc9ffba757fbe63fbd77a89
+a1a3be4c67196f57c39a88b76373733891bfaba16ed27a813ceed498804c0570
