@@ -13,12 +13,8 @@ def get_wallet():
     configuration = Configuration().load_configuration()
     api = get_api()
 
-    try:
-        address, pub_key = api.get_wallet(configuration)
+    address, pub_key = api.get_wallet(configuration)
 
-        click.echo('Account address: %s' % str(address))
-        click.echo('Account pub key: %s' % str(pub_key))
-
-    except ValueError:
-        click.echo('Incorrect password!')
+    click.echo('Account address: %s' % str(address))
+    click.echo('Account pub key: %s' % str(pub_key))
 

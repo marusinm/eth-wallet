@@ -1,4 +1,6 @@
-from eth_wallet.configuration import Configuration
+from eth_wallet.configuration import (
+    Configuration,
+)
 
 
 def prepare_conf(tmp_path):
@@ -12,6 +14,7 @@ def prepare_conf(tmp_path):
         keystore_filename='/keystore',
         eth_address='',
         public_key='',
+        network=3,
     )
     test_config = Configuration(
         config_dir=str(tmp_path),

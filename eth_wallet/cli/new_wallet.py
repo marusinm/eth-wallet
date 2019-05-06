@@ -9,9 +9,6 @@ from eth_wallet.configuration import (
 
 
 @click.command()
-# @click.option('-e', '--extra-entropy', default='', prompt='Extra entropy',
-#               help='Adds extra entropy to generated private key.')
-# def new_wallet(extra_entropy):
 def new_wallet():
     """Creates new wallet and store encrypted keystore file."""
     password = getpass.getpass('Passphrase from keystore: ')  # Prompt the user for a password of keystore file
