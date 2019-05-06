@@ -1,7 +1,15 @@
-from eth_wallet.api import WalletAPI
-from tests.conftest import prepare_conf
-from web3 import Web3
-from eth_utils import decode_hex
+from eth_wallet.api import(
+    WalletAPI,
+)
+from tests.conftest import (
+    prepare_conf,
+)
+from web3 import (
+    Web3,
+)
+from eth_utils import (
+    decode_hex,
+)
 
 
 def test_account(tmp_path):
