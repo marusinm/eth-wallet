@@ -46,6 +46,13 @@ class Configuration:
         self.public_key = ''
         self.contracts = dict()
 
+    def is_configuration(self):
+        """Checks if exists configuration on default path"""
+        if is_file(self.config_path):
+            return True
+        else:
+            return False
+
     def load_configuration(self):
         """Load bot configuration from .yaml file"""
         if not is_file(self.config_path):
