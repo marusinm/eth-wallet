@@ -1,4 +1,5 @@
-from tkinter import(
+import threading
+from tkinter import (
     Tk,
     Frame,
     Label,
@@ -10,6 +11,7 @@ from tkinter import(
     Menubutton,
     StringVar,
     RAISED,
+    messagebox,
 )
 from eth_wallet.configuration import (
     Configuration,
@@ -157,12 +159,26 @@ class TransactionPage(Page):
                              justify=CENTER)
         entry_amount.pack()
 
+        lbl_passphrase = Label(self,
+                               text="Passphrase:",
+                               width=60,
+                               font=(None, 20))
+        lbl_passphrase.pack()
+
+        entry_passphrase = Entry(self,
+                                 font=(None, 20),
+                                 width=60,
+                                 justify=CENTER)
+        entry_passphrase.pack()
+
         btn_send = Button(self,
                           text="Send",
                           width=60,
                           font=(None, 16),
-                          # command=self.navigate_home_page
-                          )
+                          command=lambda: self.send_transaction(entry_address.get(),
+                                                                entry_amount.get(),
+                                                                entry_passphrase.get(),
+                                                                token_symbol.get()))
         btn_send.pack()
 
         btn_back = Button(self,
@@ -180,6 +196,53 @@ class TransactionPage(Page):
         info_page = HomePage(self)
         info_page.place(in_=self, x=0, y=0, relwidth=1, relheight=1)
         info_page.show()
+
+    def send_transaction(self, to, value, password, token):
+        """
+        Send transaction
+        :return:
+        """
+        if token == 'ETH':
+            tx_thread = TransactionThread(configuration=self.configuration,
+                                          password=password,
+                                          to=to,
+                                          value=value,
+                                          token=None)
+        else:
+            tx_thread = TransactionThread(configuration=self.configuration,
+                                          password=password,
+                                          to=to,
+                                          value=value,
+                                          token=token)
+        tx_thread.start()
+
+
+class TransactionThread(threading.Thread):
+    def __init__(self, configuration, password, to, value, token=None):
+        threading.Thread.__init__(self)
+        self.api = WalletAPI()
+        self.configuration = configuration
+        self.password = password
+        self.to = to
+        self.value = value
+        self.token = token
+
+    def run(self):
+        if self.token is None:
+            # send ETH transaction
+            tx_hash, tx_cost_eth = self.api.send_transaction(self.configuration,
+                                                             self.password,
+                                                             self.to,
+                                                             self.value)
+        else:
+            # send erc20 transaction
+            tx_hash, tx_cost_eth = self.api.send_transaction(self.configuration,
+                                                             self.password,
+                                                             self.to,
+                                                             self.value,
+                                                             self.token)
+        messagebox.showinfo("Transaction mined!",
+                            "Transaction was mined for " + str(tx_cost_eth) + "ETH fee.")
 
         
 class AddTokenPage(Page):
@@ -260,14 +323,13 @@ class HomePage(Page):
         self.eth_balance, _ = self.api.get_balance(self.configuration)
 
         def refresh():
-            self.show()
+            change_token(token_symbol.get())
 
         def change_token(token):
             if token == 'ETH':
                 self.eth_balance, _ = self.api.get_balance(self.configuration)
             else:
                 self.eth_balance, _ = self.api.get_balance(self.configuration, token)
-
             balance.set(str(self.eth_balance) + ' ' + token)
 
         token_symbol = StringVar()
