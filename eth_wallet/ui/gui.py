@@ -118,25 +118,27 @@ class HomePage(Page):
 
         self.configuration = Configuration().load_configuration()
         self.api = WalletAPI()
+        self.tokens = self.api.list_tokens(self.configuration)
+        self.eth_balance, _ = self.api.get_balance(self.configuration)
 
         def refresh():
             self.show()
 
-        # menubar = Menu(self)
-        # filemenu = Menu(menubar, tearoff=0)
-        # filemenu.add_command(label="Add token", command=refresh)
-        # filemenu.add_command(label="Reveal seed", command=refresh)
-        # filemenu.add_command(label="Show config", command=refresh)
-        # filemenu.add_separator()
-        # filemenu.add_command(label="Exit", command=self.quit)
-        # menubar.add_cascade(label="File", menu=filemenu)
-        # # self.config(menu=menubar)
-        # menubar.pack()
+        def change_token(token):
+            if token == 'ETH':
+                self.eth_balance, _ = self.api.get_balance(self.configuration)
+            else:
+                self.eth_balance, _ = self.api.get_balance(self.configuration, token)
+
+            balance.set(str(self.eth_balance) + ' ' + token)
+
+        def add_token():
+            print("add token")
 
         token_symbol = StringVar()
         token_symbol.set('ETH')
-        def hello():
-            print(token_symbol.get())
+        balance = StringVar()
+        balance.set(str(self.eth_balance) + ' ' + token_symbol.get())
 
         mb = Menubutton(self,
                         width=60,
@@ -148,20 +150,19 @@ class HomePage(Page):
         mb.menu.add_radiobutton(label="ETH",
                                 variable=token_symbol,
                                 value='ETH',
-                                command=hello)
-        mb.menu.add_radiobutton(label="FIT",
-                                variable=token_symbol,
-                                value='FIT',
-                                command=hello)
-        mb.menu.add_radiobutton(label="BNB",
-                                variable=token_symbol,
-                                value='BNB',
-                                command=hello)
+                                command=lambda: change_token(token_symbol.get()))
+        for token in self.tokens:
+            mb.menu.add_radiobutton(label=token,
+                                    variable=token_symbol,
+                                    value=token,
+                                    command=lambda: change_token(token_symbol.get()))
+        mb.menu.add_radiobutton(label="Add new token ...",
+                                command=add_token)
         mb.pack()
 
-        eth_balance, address = self.api.get_balance(self.configuration)
         label = Label(self,
-                      text=str(eth_balance)+' ETH',
+                      # text=str(eth_balance) + ' ' + token_symbol.get(),
+                      textvariable=balance,
                       width=60,
                       font=(None, 30))
         label.pack()
