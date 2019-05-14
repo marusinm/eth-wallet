@@ -8,7 +8,6 @@ from tkinter import(
     CENTER,
     Menu,
     Menubutton,
-    IntVar,
     StringVar,
     RAISED,
 )
@@ -75,11 +74,11 @@ class NewWalletPage(Page):
                                background='light blue')
         lbl_mnemonic.pack()
         btn_create_wallet.configure(text="Continue",
-                                    command=self.show_home_page)
+                                    command=self.navigate_home_page)
 
-    def show_home_page(self):
+    def navigate_home_page(self):
         """
-        Show home page
+        Navigate to home page
         :return:
         """
         info_page = HomePage(self)
@@ -94,18 +93,157 @@ class TransactionPage(Page):
 
         self.configuration = Configuration().load_configuration()
         self.api = WalletAPI()
+        self.tokens = self.api.list_tokens(self.configuration)
+        self.eth_balance, _ = self.api.get_balance(self.configuration)
 
-        label = Label(self, text='transaction page')
+        def change_token(token):
+            if token == 'ETH':
+                self.eth_balance, _ = self.api.get_balance(self.configuration)
+            else:
+                self.eth_balance, _ = self.api.get_balance(self.configuration, token)
+
+            balance.set(str(self.eth_balance) + ' ' + token)
+
+        token_symbol = StringVar()
+        token_symbol.set('ETH')
+        balance = StringVar()
+        balance.set(str(self.eth_balance) + ' ' + token_symbol.get())
+
+        mb = Menubutton(self,
+                        width=60,
+                        textvariable=token_symbol,
+                        relief=RAISED)
+        mb.grid()
+        mb.menu = Menu(mb, tearoff=0)
+        mb["menu"] = mb.menu
+        mb.menu.add_radiobutton(label="ETH",
+                                variable=token_symbol,
+                                value='ETH',
+                                command=lambda: change_token(token_symbol.get()))
+        for token in self.tokens:
+            mb.menu.add_radiobutton(label=token,
+                                    variable=token_symbol,
+                                    value=token,
+                                    command=lambda: change_token(token_symbol.get()))
+        mb.pack()
+
+        label = Label(self,
+                      textvariable=balance,
+                      width=60,
+                      font=(None, 30))
         label.pack()
 
-        btn_back = Button(self, text="Back", command=self.show_home_page)
+        lbl_address = Label(self,
+                            text="To address:",
+                            width=60,
+                            font=(None, 20))
+        lbl_address.pack()
+
+        entry_address = Entry(self,
+                              font=(None, 20),
+                              width=60,
+                              justify=CENTER)
+        entry_address.pack()
+
+        lbl_amount = Label(self,
+                           text="Amount:",
+                           width=60,
+                           font=(None, 20))
+        lbl_amount.pack()
+
+        entry_amount = Entry(self,
+                             font=(None, 20),
+                             width=60,
+                             justify=CENTER)
+        entry_amount.pack()
+
+        btn_send = Button(self,
+                          text="Send",
+                          width=60,
+                          font=(None, 16),
+                          # command=self.navigate_home_page
+                          )
+        btn_send.pack()
+
+        btn_back = Button(self,
+                          text="Back",
+                          width=60,
+                          font=(None, 16),
+                          command=self.navigate_home_page)
         btn_back.pack()
 
-    def show_home_page(self):
+    def navigate_home_page(self):
         """
-        Show home page
+        Navigate to home page
         :return:
         """
+        info_page = HomePage(self)
+        info_page.place(in_=self, x=0, y=0, relwidth=1, relheight=1)
+        info_page.show()
+
+        
+class AddTokenPage(Page):
+
+    def __init__(self, *args, **kwargs):
+        Page.__init__(self, *args, **kwargs)
+
+        self.configuration = Configuration().load_configuration()
+        self.api = WalletAPI()
+
+        lbl_symbol = Label(self,
+                           text="Contract's symbol:",
+                           width=60,
+                           font=(None, 20))
+        lbl_symbol.pack()
+
+        entry_symbol = Entry(self,
+                             font=(None, 20),
+                             width=60,
+                             justify=CENTER)
+        entry_symbol.pack()
+
+        lbl_address = Label(self,
+                            text="Contract's address:",
+                            width=60,
+                            font=(None, 20))
+        lbl_address.pack()
+
+        entry_address = Entry(self,
+                              font=(None, 20),
+                              width=60,
+                              justify=CENTER)
+        entry_address.pack()
+
+        btn_back = Button(self,
+                          text="Add",
+                          font=(None, 16),
+                          width=60,
+                          command=lambda: self.add_token(entry_symbol.get(), entry_address.get()))
+        btn_back.pack()
+        btn_back = Button(self,
+                          text="Back",
+                          font=(None, 16),
+                          width=60,
+                          command=self.navigate_home_page)
+        btn_back.pack()
+
+    def navigate_home_page(self):
+        """
+        Navigate to home page
+        :return:
+        """
+        info_page = HomePage(self)
+        info_page.place(in_=self, x=0, y=0, relwidth=1, relheight=1)
+        info_page.show()
+        
+    def add_token(self, symbol, contract):
+        """
+        Add new token and navigate to home page
+        :param symbol: token symbol
+        :param contract: contracts address
+        :return:
+        """
+        self.api.add_contract(self.configuration, symbol, contract)
         info_page = HomePage(self)
         info_page.place(in_=self, x=0, y=0, relwidth=1, relheight=1)
         info_page.show()
@@ -132,9 +270,6 @@ class HomePage(Page):
 
             balance.set(str(self.eth_balance) + ' ' + token)
 
-        def add_token():
-            print("add token")
-
         token_symbol = StringVar()
         token_symbol.set('ETH')
         balance = StringVar()
@@ -157,7 +292,7 @@ class HomePage(Page):
                                     value=token,
                                     command=lambda: change_token(token_symbol.get()))
         mb.menu.add_radiobutton(label="Add new token ...",
-                                command=add_token)
+                                command=self.navigate_add_token_page)
         mb.pack()
 
         label = Label(self,
@@ -176,19 +311,28 @@ class HomePage(Page):
 
         btn_send_transaction = Button(self,
                                       text="Send Transaction",
-                                      command=self.show_transaction_page,
+                                      command=self.navigate_transaction_page,
                                       width=60,
                                       font=(None, 16))
         btn_send_transaction.pack()
 
-    def show_transaction_page(self):
+    def navigate_transaction_page(self):
         """
-        Show transaction page
+        Navigate to transaction page
         :return:
         """
         transaction_page = TransactionPage(self)
         transaction_page.place(in_=self, x=0, y=0, relwidth=1, relheight=1)
         transaction_page.show()
+
+    def navigate_add_token_page(self):
+        """
+        Navigate to transaction page
+        :return:
+        """
+        add_token_page = AddTokenPage(self)
+        add_token_page.place(in_=self, x=0, y=0, relwidth=1, relheight=1)
+        add_token_page.show()
 
 
 class MainView(Frame):
