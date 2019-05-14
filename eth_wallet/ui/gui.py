@@ -320,16 +320,16 @@ class HomePage(Page):
         self.configuration = Configuration().load_configuration()
         self.api = WalletAPI()
         self.tokens = self.api.list_tokens(self.configuration)
-        self.eth_balance, _ = self.api.get_balance(self.configuration)
+        self.eth_balance, self.address = self.api.get_balance(self.configuration)
 
         def refresh():
             change_token(token_symbol.get())
 
         def change_token(token):
             if token == 'ETH':
-                self.eth_balance, _ = self.api.get_balance(self.configuration)
+                self.eth_balance, self.address = self.api.get_balance(self.configuration)
             else:
-                self.eth_balance, _ = self.api.get_balance(self.configuration, token)
+                self.eth_balance, self.address = self.api.get_balance(self.configuration, token)
             balance.set(str(self.eth_balance) + ' ' + token)
 
         token_symbol = StringVar()
@@ -357,12 +357,22 @@ class HomePage(Page):
                                 command=self.navigate_add_token_page)
         mb.pack()
 
-        label = Label(self,
-                      # text=str(eth_balance) + ' ' + token_symbol.get(),
-                      textvariable=balance,
-                      width=60,
-                      font=(None, 30))
-        label.pack()
+        label_address_lbl = Label(self,
+                                  text='Address:',
+                                  width=60,
+                                  font=(None, 10, "bold"))
+        label_address_lbl.pack()
+        label_address = Label(self,
+                              text=self.address,
+                              width=60,
+                              font=(None, 10))
+        label_address.pack()
+
+        label_balance = Label(self,
+                              textvariable=balance,
+                              width=60,
+                              font=(None, 30))
+        label_balance.pack()
 
         btn_refresh = Button(self,
                              text="Refresh",
@@ -370,6 +380,13 @@ class HomePage(Page):
                              width=60,
                              font=(None, 16))
         btn_refresh.pack()
+
+        btn_copy_address = Button(self,
+                                  text="Copy address",
+                                  command=self.copy_address,
+                                  width=60,
+                                  font=(None, 16))
+        btn_copy_address.pack()
 
         btn_send_transaction = Button(self,
                                       text="Send Transaction",
@@ -395,6 +412,11 @@ class HomePage(Page):
         add_token_page = AddTokenPage(self)
         add_token_page.place(in_=self, x=0, y=0, relwidth=1, relheight=1)
         add_token_page.show()
+
+    def copy_address(self):
+        """Add address to the clipboard"""
+        self.clipboard_clear()  # clear clipboard contents
+        self.clipboard_append(self.address)  # append new value to clipbao 
 
 
 class MainView(Frame):
