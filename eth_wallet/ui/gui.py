@@ -4,6 +4,13 @@ from tkinter import(
     Label,
     Button,
     Entry,
+    Message,
+    CENTER,
+    Menu,
+    Menubutton,
+    IntVar,
+    StringVar,
+    RAISED,
 )
 from eth_wallet.configuration import (
     Configuration,
@@ -25,11 +32,22 @@ class NewWalletPage(Page):
         self.api = WalletAPI()
         self.wallet = None
 
-        entry_password = Entry(self, show="*")
+        lbl_pswd = Label(self,
+                         text='Passphrase:',
+                         width=60,
+                         font=(None, 20))
+        lbl_pswd.pack()
+
+        entry_password = Entry(self,
+                               show="*",
+                               font=(None, 20),
+                               justify=CENTER)
         entry_password.pack()
 
         btn_create_wallet = Button(self,
                                    text="Generate",
+                                   width=60,
+                                   font=(None, 16),
                                    command=lambda: self.create_wallet(btn_create_wallet,
                                                                       entry_password.get()))
 
@@ -45,7 +63,16 @@ class NewWalletPage(Page):
         self.configuration = Configuration().load_configuration()
         self.wallet = self.api.new_wallet(self.configuration, password)
 
-        lbl_mnemonic = Label(self, text=self.wallet.get_mnemonic())
+        lbl_remember_words = Label(self,
+                                   text='Restore sentence:',
+                                   width=60)
+        lbl_remember_words.pack()
+
+        lbl_mnemonic = Message(self,
+                               text=self.wallet.get_mnemonic(),
+                               justify=CENTER,
+                               borderwidth=10,
+                               background='light blue')
         lbl_mnemonic.pack()
         btn_create_wallet.configure(text="Continue",
                                     command=self.show_home_page)
@@ -95,14 +122,62 @@ class HomePage(Page):
         def refresh():
             self.show()
 
+        # menubar = Menu(self)
+        # filemenu = Menu(menubar, tearoff=0)
+        # filemenu.add_command(label="Add token", command=refresh)
+        # filemenu.add_command(label="Reveal seed", command=refresh)
+        # filemenu.add_command(label="Show config", command=refresh)
+        # filemenu.add_separator()
+        # filemenu.add_command(label="Exit", command=self.quit)
+        # menubar.add_cascade(label="File", menu=filemenu)
+        # # self.config(menu=menubar)
+        # menubar.pack()
+
+        token_symbol = StringVar()
+        token_symbol.set('ETH')
+        def hello():
+            print(token_symbol.get())
+
+        mb = Menubutton(self,
+                        width=60,
+                        textvariable=token_symbol,
+                        relief=RAISED)
+        mb.grid()
+        mb.menu = Menu(mb, tearoff=0)
+        mb["menu"] = mb.menu
+        mb.menu.add_radiobutton(label="ETH",
+                                variable=token_symbol,
+                                value='ETH',
+                                command=hello)
+        mb.menu.add_radiobutton(label="FIT",
+                                variable=token_symbol,
+                                value='FIT',
+                                command=hello)
+        mb.menu.add_radiobutton(label="BNB",
+                                variable=token_symbol,
+                                value='BNB',
+                                command=hello)
+        mb.pack()
+
         eth_balance, address = self.api.get_balance(self.configuration)
-        label = Label(self, text=str(eth_balance)+'ETH')
+        label = Label(self,
+                      text=str(eth_balance)+' ETH',
+                      width=60,
+                      font=(None, 30))
         label.pack()
 
-        btn_refresh = Button(self, text="Refresh", command=refresh)
+        btn_refresh = Button(self,
+                             text="Refresh",
+                             command=refresh,
+                             width=60,
+                             font=(None, 16))
         btn_refresh.pack()
 
-        btn_send_transaction = Button(self, text="Send Transaction", command=self.show_transaction_page)
+        btn_send_transaction = Button(self,
+                                      text="Send Transaction",
+                                      command=self.show_transaction_page,
+                                      width=60,
+                                      font=(None, 16))
         btn_send_transaction.pack()
 
     def show_transaction_page(self):
@@ -136,7 +211,8 @@ class MainView(Frame):
 
 if __name__ == "__main__":
     root = Tk()
+    root.title("Ethereum wallet")
     main = MainView(root)
     main.pack(side="top", fill="both", expand=True)
-    root.wm_geometry("500x600")
+    root.wm_geometry("300x400")
     root.mainloop()
