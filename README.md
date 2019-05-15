@@ -1,6 +1,27 @@
 # eth-wallet 
 
-Ethereum wallet in Python
+Command line wallet for Ethereum and ERC20 tokens. 
+
+## Usage
+
+```
+eth-wallet --help
+Usage: eth-wallet [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  add-token         Add new ERC20 contract.
+  get-balance       Get address balance.
+  get-wallet        Get wallet account from encrypted keystore.
+  list-tokens       List all added tokens.
+  network           Get connected network (Mainnet, Ropsten) defined in...
+  new-wallet        Creates new wallet and store encrypted keystore file.
+  restore-wallet    Creates new wallet and store encrypted keystore file.
+  reveal-seed       Reveals private key from encrypted keystore.
+  send-transaction  Sends transaction.
+```
 
 ### Create wallet
 Create new wallet:
@@ -10,7 +31,7 @@ $ eth-wallet new-wallet
 
 Account address: 0xB1f761734F00d1D368Ce6f82F755bBb3005538EB
 Account pub key: 0xf94e03524a1bd803ee583a1f0de7eb1eb67a90d6802eeac22b90cfdd7ff491039441472e8db543467c0450d1b7c31b5e8f81616b99226775770f9dd531afd31a
-Keystore path: /Users/Marek/.eth-wallet/keystore
+Keystore path: /Users/Joe/.eth-wallet/keystore
 Remember these words to restore eth-wallet: omit speak giant bright enable increase tube worth object timber bleak bullet
 ```
 Show wallet:
@@ -89,9 +110,11 @@ $ eth-wallet restore-wallet
    
 Account address: 0xB1f761734F00d1D368Ce6f82F755bBb3005538EB
 Account pub key: 0xf94e03524a1bd803ee583a1f0de7eb1eb67a90d6802eeac22b90cfdd7ff491039441472e8db543467c0450d1b7c31b5e8f81616b99226775770f9dd531afd31a
-Keystore path: /Users/Marek/.eth-wallet/keystore
+Keystore path: /Users/Joe/.eth-wallet/keystore
 Remember these words to restore eth-wallet: omit speak giant bright enable increase tube worth object timber bleak bullet
 ```
+> Mnemonic sentence isn't fully compatible with BIP32 and BIP39 wallets, therefore only this implementation can reproduce mnemonic sentence and recreate seed!
+
 Reveal wallet master private key:
 ```
 $ eth-wallet reveal-seed   
@@ -99,8 +122,3 @@ $ eth-wallet reveal-seed
   
 Account prv key: 0x843844a23e3ae7b6a695a346c981484b554ff1718299b0b42df3045f04b94f05
 ```
-
-TODO: mention `--help`
-TODO: remove Marek from paths as keystore path
-5b56c417303faa3fcba7e57400e120a0ca83ec5a4fc9ffba757fbe63fbd77a89
-a1a3be4c67196f57c39a88b76373733891bfaba16ed27a813ceed498804c0570
