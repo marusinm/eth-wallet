@@ -1,7 +1,13 @@
 # eth-wallet 
 
-Command line wallet for Ethereum and ERC20 tokens. 
+Command line wallet for Ethereum and ERC20 tokens.
 
+## Installation
+1. Clone this repository  
+2. Optionally set virtual environment  
+3. Navigate to the project's root dir and run `pip3 install .`  
+4. Run `eth-wallet --help` to see if wallet was installed successfully  
+ 
 ## Usage
 
 ```
