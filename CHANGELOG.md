@@ -1,3 +1,8 @@
+# 1.1.1
+
+* Simple GUI for testing purpose
+* Fixes
+
 # 1.1.0
 
 * Add support for ERC20 smart contract manipulation and transactions
