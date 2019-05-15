@@ -119,7 +119,7 @@ Account pub key: 0xf94e03524a1bd803ee583a1f0de7eb1eb67a90d6802eeac22b90cfdd7ff49
 Keystore path: /Users/Joe/.eth-wallet/keystore
 Remember these words to restore eth-wallet: omit speak giant bright enable increase tube worth object timber bleak bullet
 ```
-> Mnemonic sentence isn't fully compatible with BIP32 and BIP39 wallets, therefore only this implementation can reproduce mnemonic sentence and recreate seed!
+> Mnemonic sentence isn't fully compatible with BIP32 and BIP39 wallets. Therefore, only this implementation can reproduce mnemonic sentence and recreate seed!
 
 Reveal wallet master private key:
 ```
@@ -128,3 +128,10 @@ $ eth-wallet reveal-seed
   
 Account prv key: 0x843844a23e3ae7b6a695a346c981484b554ff1718299b0b42df3045f04b94f05
 ```
+
+## GUI
+
+For the testing purpose, an additionally GUI is available. 
+However, it is not recommended to use since GUI doesn't provide full functionality.
+#### Example  
+![Screen1](https://raw.githubusercontent.com/marusinm/eth-wallet/master/doc/imgs/mac-new-wallet.png) 
